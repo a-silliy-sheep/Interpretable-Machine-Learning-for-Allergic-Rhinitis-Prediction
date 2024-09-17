@@ -33,7 +33,7 @@ library(Cairo)
 
 library(ROCR)  # relate to ROC
 source(file = "./funct_.R")  # There are related custom functions within
-load(file = "D:/paperStage1/Data/Closed/2018CCHH_Urumqi/Code_/MachineLearning/rhinitis/New/Initial.RData")
+load(file = "./New/Initial.RData")
 
 
 #######The original data collation process involves data security issues and is therefore not shown. 
@@ -46,9 +46,9 @@ dfCheck <- obj_
 # Data preprocessing before interpolation----------------------------------------------------------------------------
 dfCheck2 <- dfCheck
 colnames(dfCheck2)
-sum(dfCheck2[, '如果是.孩子大约几岁时.被首次诊断'] %in% c(1))  # See the number of children with AR at age 1
+sum(dfCheck2[, 'If yes, how old is the child when first be diagnosed as AR by doctor'] %in% c(1))  # See the number of children with AR at age 1
 
-dfCheck2 <- dfCheck2[!dfCheck2[, '如果是.孩子大约几岁时.被首次诊断'] %in% c(1), ]  # Exclusion of children with AR at 1 year of age
+dfCheck2 <- dfCheck2[!dfCheck2[, 'If yes, how old is the child when first be diagnosed as AR by doctor'] %in% c(1), ]  # Exclusion of children with AR at 1 year of age
 
 
 dfModel <- dfCheck2[, -c(1:41, 45:49, 52:54, 56:58, 63:77, 82:102, 107:108, 112:121, 125:130, 134:139, 150:153,
@@ -59,39 +59,38 @@ get_compositionDrop(dfModel, threshold_ = 0.985)
 
 dfModel <- dfModel[, -c(5, 11:12)]
 
-table(dfModel[, '如果是.孩子大约几岁时.被首次诊断'], exclude = T)  # Find out how old a child was when diagnosed with AR
-prop.table(table(dfModel[, '如果是.孩子大约几岁时.被首次诊断'], exclude = T))  # View Composition Ratio 7.8%
+table(dfModel[, 'If yes, how old is the child when first be diagnosed as AR by doctor'], exclude = T)  # Find out how old a child was when diagnosed with AR
+prop.table(table(dfModel[, 'If yes, how old is the child when first be diagnosed as AR by doctor'], exclude = T))  # View Composition Ratio 7.8%
 colnames(dfModel)
 
 
 dfModel <- dfModel %>% dplyr::mutate(
-  AR_doctor_moreThan1 = ifelse(dfModel[, '如果是.孩子大约几岁时.被首次诊断'] %in% c(2, 3, 4, 5, 6), 1, 0),
-  孩子0_1岁曾出现呼吸困难_发出像哮鸣音 = ifelse(dfModel[, '如果是.孩子在那些年龄段出现过.不满1岁时'] == 1, 1, 0),
-  孩子0_1岁在没有感冒_流感的情况下打喷嚏 = ifelse(dfModel[, '如是.孩子在哪些年龄段.不满1岁'] == 1, 1, 0),
-  孩子0_1岁有过至少连续6个月反复发作的瘙痒疹子 = ifelse(dfModel[, '如果是.孩子在哪些年龄段发生过'] == 1, 1, 0),
-  孩子0_1岁被医生确诊为AD = ifelse(dfModel[, '如果是.大约几岁被诊断为花粉症或过敏性鼻炎'] == 1, 1, 0),
-  孩子0_1岁患医生诊断的肺炎 = ifelse(dfModel[, '如果是.孩子在那些年龄段被诊断.不满1岁'] == 1, 1, 0),
-  孩子0_1岁曾接受过抗生素治疗 = ifelse(dfModel[, '有.不满1岁'] == 1, 1, 0),
-  孩子睡觉房间的卫生清洁频率 = ifelse(孩子睡觉房间的卫生清洁频率 %in% c(3, 4, 5, 6), 3, 孩子睡觉房间的卫生清洁频率),  # 3:Once a week or less
-  如果孩子不满1岁接受过抗生素治疗.那么有几次 = ifelse(如果孩子不满1岁接受过抗生素治疗.那么有几次 %in% c(1, 2),
-                                  2, 如果孩子不满1岁接受过抗生素治疗.那么有几次),  # 2: 1-2次
-  是否为独生子女 = ifelse(孩子是否为独生子女_sub == 0, 1, 0),  # 1：is only child.， 0：no
-  haveOlderSblings = ifelse(孩子是否为独生子女_sub == 1, 1, 0),   # 1：have a brother and a sister.， 0：no
+  AR_doctor_moreThan1 = ifelse(dfModel[, 'If yes, how old is the child when first be diagnosed as AR by doctor'] %in% c(2, 3, 4, 5, 6), 1, 0),
+  wheeze_0_1 = ifelse(dfModel[, 'If yes, how old is the child when occurred wheeze__less than 1-year-old'] == 1, 1, 0),
+  Sneeze_0_1 = ifelse(dfModel[, 'If yes, how old is the child when occurred sneeze__less than 1-year-old'] == 1, 1, 0),
+  RashSixM_0_1 = ifelse(dfModel[, 'If yes, how old is the child when occurred successive bouts of rash more than 6 months'] == 1, 1, 0),
+  ChildWithAD_0_1 = ifelse(dfModel[, 'If yes, how old is the child when first be diagnosed as AD by doctor'] == 1, 1, 0),
+  ChildWithPneumonia_0_1 = ifelse(dfModel[, 'If yes, how old is the child when first be diagnosed as pneumonia by doctor__less than 1-year-old'] == 1, 1, 0),
+  ChildWithAntibiotics_0_1 = ifelse(dfModel[, 'Using antibiotics__less than 1-year-old'] == 1, 1, 0),
+  Times of cleaning of child beddingroom per week = ifelse(Times of cleaning of child beddingroom per week %in% c(3, 4, 5, 6), 3, Times of cleaning of child beddingroom per week),  # 3:Once a week or less
+  Times of antibiotics using when cfy = ifelse(Times of antibiotics using when cfy %in% c(1, 2),
+                                  2, Times of antibiotics using when cfy),  # 2: 1-2次
+  onlyChild = ifelse(Only child == 0, 1, 0),  # 1：is only child.， 0：no
+  haveOlderSblings = ifelse(Only child == 1, 1, 0),   # 1：have a brother and a sister.， 0：no
   preDeliver_delayDeliver = ifelse(preDeliver_delayDeliver == 1, -1,   # -1: premature
                                    ifelse(preDeliver_delayDeliver == 0, 0,  # normal
                                           ifelse(preDeliver_delayDeliver == 2 , 1, NA))),  # 1:
   age = ifelse(realAgeToQuestionnaire_YMD_byM <= 60, 0, 
                ifelse(realAgeToQuestionnaire_YMD_byM > 60 & realAgeToQuestionnaire_YMD_byM < 72 , 1, 2))
-) %>% dplyr::select(-c('孩子在没有感冒.流感的情况下是否打喷嚏等', '孩子是否曾被医生诊断患湿疹或过敏性皮炎',
-                       '如果是.大约几岁被诊断为花粉症或过敏性鼻炎', '孩子是否患过肺炎', '您的孩子是否患过耳炎',
-                       "孩子是否被医生诊断为患有花粉症或过敏性鼻炎", "如果是.孩子大约几岁时.被首次诊断",
-                       "孩子是否曾出现过呼吸困难.发出像哮鸣音", '如果是.孩子在那些年龄段出现过.不满1岁时',
-                       '如是.孩子在哪些年龄段.不满1岁', 'height_birth', '孩子通常睡在哪个房间', '如果是.地毯地垫的大小',
-                       '孩子是否为独生子女_sub', 'realAgeToQuestionnaire_YMD_byM',
-                       '孩子通常睡觉房间地板材料是', '孩子通常睡觉的房间.其墙壁的表面材料为',
-                       '孩子是否有过至少连续6个月反复发作的瘙痒疹子', '如果是.孩子在哪些年龄段发生过',
-                       '如果是.孩子的肺炎是否经过医生诊断', '如果是.孩子在那些年龄段被诊断.不满1岁',
-                       '孩子是否接受过抗生素治疗.没有用过', '有.不满1岁')
+) %>% dplyr::select(-c('Sneezing without having cold', 'Diagnosing as eczema by doctor',
+                       'If yes, how old is the child when first be diagnosed as AR by doctor', 'Child with pneumonia or not', 'Child with otitis or not',
+                       "Child with AR diagnosing by doctor", "If yes, how old is the child when first be diagnosed as AR by doctor",
+                       "Child ever with wheeze or not", 'If yes, how old is the child when occurred wheeze__less than 1-year-old',
+                       'If yes, how old is the child when occurred sneeze__less than 1-year-old', 'height_birth', 'Type of room that child sleeping in', 'Size of carpet',
+                       'Only child', 'realAgeToQuestionnaire_YMD_byM',
+                       'Child with successive bouts of rash more than 6 months', 'If yes, how old is the child when occurred successive bouts of rash more than 6 months',
+                       'If yes, how old is the child when first be diagnosed as pneumonia by doctor__less than 1-year-old',
+                       'Using antibiotics__less than 1-year-old')
                     )
 
 colnames(dfModel)
@@ -110,21 +109,21 @@ library(scales)
 
 
 dfModel <- dfModel %>% dplyr::mutate(  # Continued adjustment of variables
-  parentIncome = ifelse(dfModel[, '孩子父母年均家庭税前总收入约'] %in% c(1, 2), 1,   #----  1: 小于10W
-                        ifelse(dfModel[, '孩子父母年均家庭税前总收入约'] %in% c(3, 4), 2,  #----  2: 10~40W
-                               ifelse(dfModel[, '孩子父母年均家庭税前总收入约'] == 5, 3, NA))),  #----  3: 大于40W
-  maternalFeeding= ifelse(dfModel[, '孩子进行纯母乳喂养的持续时间'] %in% c(1, 2), 1,   #---- 1:'不到1个月甚至无'
-                       ifelse(dfModel[, '孩子进行纯母乳喂养的持续时间']  == 3, 2,  #---- 2: '≥1个月且小于4个月'
-                              ifelse(dfModel[, '孩子进行纯母乳喂养的持续时间'] == 4, 3,  #--- 3: '≥4个月且少于6个月'
-                                     ifelse(dfModel[, '孩子进行纯母乳喂养的持续时间'] %in% c(5, 6), 4, NA)))),  # -- 4： '6个月及以上'
-  momEducation= ifelse(dfModel[, '母亲的最高学历是'] == 1, 1,   #----  1：'低'---- . <= 12 年
-                         ifelse(dfModel[, '母亲的最高学历是'] %in% c(2), 2,  #----:2：'中'-----12 < . <= 15
-                                ifelse(dfModel[, '母亲的最高学历是'] %in% c(3, 4), 3, NA))),   #---3：'高'---- . >15 硕士及以上
-  dadEducation= ifelse(dfModel[, '父亲的最高学历是'] == 1, 1,   #----1：低' ----中专或以下
-                       ifelse(dfModel[, '父亲的最高学历是'] %in% c(2), 2,  #----  2：'中'------  大专本科
-                              ifelse(dfModel[, '父亲的最高学历是'] %in% c(3, 4), 3, NA))),  #---- 3： '高'----- 硕士及以上
-) %>% dplyr::select(-c('孩子父母年均家庭税前总收入约', '孩子进行纯母乳喂养的持续时间',
-                       '母亲的最高学历是', '父亲的最高学历是'))
+  parentIncome = ifelse(dfModel[, 'Average annual gross family income before taxes is about'] %in% c(1, 2), 1,   #----  1: less than 100,000 RBM
+                        ifelse(dfModel[, 'Average annual gross family income before taxes is about'] %in% c(3, 4), 2,  #----  2: 100,000 ~ 400,000 RBM
+                               ifelse(dfModel[, 'Average annual gross family income before taxes is about'] == 5, 3, NA))),  #----  3: more than 400,000 RBM
+  maternalFeeding= ifelse(dfModel[, 'Duration for which the child is exclusively breastfed'] %in% c(1, 2), 1,   #---- 1: no more than 1 month
+                       ifelse(dfModel[, 'Duration for which the child is exclusively breastfed']  == 3, 2,  #---- 2: [1, 4) months
+                              ifelse(dfModel[, 'Duration for which the child is exclusively breastfed'] == 4, 3,  #--- 3: [4, 6) months
+                                     ifelse(dfModel[, 'Duration for which the child is exclusively breastfed'] %in% c(5, 6), 4, NA)))),  # -- 4： [6, +) months
+  momEducation= ifelse(dfModel[, 'Highest educational level of mom'] == 1, 1,   #----  1：'low'---- . <= 12 year
+                         ifelse(dfModel[, 'Highest educational level of mom'] %in% c(2), 2,  #----:2：'median'-----12 < . <= 15 year
+                                ifelse(dfModel[, 'Highest educational level of mom'] %in% c(3, 4), 3, NA))),   #---3：'high'---- . >15 year, master or above
+  dadEducation= ifelse(dfModel[, 'Highest educational level of dad'] == 1, 1,   #----  1：'low'---- . <= 12 year
+                       ifelse(dfModel[, 'Highest educational level of dad'] %in% c(2), 2,  #----:2：'median'-----12 < . <= 15 year
+                              ifelse(dfModel[, 'Highest educational level of dad'] %in% c(3, 4), 3, NA))),   #---3：'high'---- . >15 year, master or above
+) %>% dplyr::select(-c('Average annual gross family income before taxes is about', 'Duration for which the child is exclusively breastfed',
+                       'Highest educational level of mom', 'Highest educational level of dad'))
 
 colnames(dfModel)
 
@@ -138,7 +137,7 @@ get_compositionDrop(dfModelOK)
 
       # Data verification：
 View(cbind(dfModel[rownames(dfModelOK), c("weight_birth", "bmi_birth")],
-           dfModelOK[, c("孩子的性别是", "weight_birth", "bmi_birth")]))
+           dfModelOK[, c("Gender", "weight_birth", "bmi_birth")]))
 
 colnames(dfModelOK)
 
@@ -152,8 +151,8 @@ dfModelOK <- dfModelOK %>% dplyr::mutate(
   nothing = 'None'
 ) %>% dplyr::select('event', 'nothing', everything())
 
-#     dfSave(dfModelOK, file = 'dfModelOK_仅筛选_未进行填充和特征选择')
-load('./dfModelOK_仅筛选_未进行填充和特征选择.RData') # -------------------------------------------Intermediate data loading
+#     dfSave(dfModelOK, file = 'dfModelOK_FilterOnly_WithoutFill&FeaturesEngineering.RData')
+load('./dfModelOK_FilterOnly_WithoutFill&FeaturesEngineering.RData') # -------------------------------------------Intermediate data loading
 dfModelOK <- obj_
 
 # Data Filling & Feature Selection---------------(around 10 hours)---------------------------
@@ -178,15 +177,15 @@ imp_togDf <- na.omit(imp_togDf)
 colnames(imp_togDf)
 
 
-#     dfSave(imp_togDf, file = 'imp_togDf_已RF填充_且剔除填充后仍缺失样本')
-load('./imp_togDf_已RF填充_且剔除填充后仍缺失样本.RData') # ----------------------------------------Intermediate data loading
+#     dfSave(imp_togDf, file = 'imp_togDf_AfterFillWithRF_StillHavingNAYet.RData')
+load('./imp_togDf_AfterFillWithRF_StillHavingNAYet.RData') # ----------------------------------------Intermediate data loading
 imp_togDf <- obj_
 
 get_compositionDrop(imp_togDf)
 
-get_CrossTable(df_ = imp_togDf, outcome_ind_ = 1, factor_ind_ = 3:ncol(imp_togDf), output_ = T, file_ = 'featureSelet_卡方.xlsx')
+get_CrossTable(df_ = imp_togDf, outcome_ind_ = 1, factor_ind_ = 3:ncol(imp_togDf), output_ = T, file_ = 'featureSelet_Chisq.xlsx')
 
-feature1 <- read.xlsx('./featureSelet_卡方.xlsx') %>% 
+feature1 <- read.xlsx('./featureSelet_Chisq.xlsx') %>% 
   dplyr::filter(p.value <0.05) %>% dplyr::select('var')
 
 #     write.table(feature1, file = 'feature1.txt')
@@ -195,19 +194,19 @@ feature1 <- read.table('./feature1.txt')   # -----------------------------------
 
 
 # Stratified data
-dfStratify <- imp_togDf[, c('孩子的性别是', '孩子的出生方式', 'age')]
+dfStratify <- imp_togDf[, c('Gender', 'ModeOfBirth', 'age')]
        
 identical(rownames(imp_togDf), rownames(dfStratify))  # True
 
 dfStratify <- dfStratify %>% 
   dplyr::mutate(
-    sex = 孩子的性别是,
-    birthWay = 孩子的出生方式
-  ) %>% dplyr::select(-c('孩子的性别是', '孩子的出生方式'))
+    sex = Gender,
+    birthWay = ModeOfBirth
+  ) %>% dplyr::select(-c('Gender', 'ModeOfBirth'))
 
-attr(dfStratify$sex, "label") <- "1=男；2=女"
-attr(dfStratify$birthWay, "label") <- "1=顺产；2=剖宫产"
-attr(dfStratify$age, "label") <- "0 = 2-4岁；1 = 5岁；2 = 6-8岁"
+attr(dfStratify$sex, "label") <- "1=male；2=female"
+attr(dfStratify$birthWay, "label") <- "1=eutocia；2=cesarean"
+attr(dfStratify$age, "label") <- "0 = 2-4-year-old；1 = 5-year-old；2 = 6-8-year-old"
 
 
 #       dfSave(obj_ = dfStratify, file_name = 'dfStratify')
@@ -215,7 +214,7 @@ load('./dfStratify.RData')    # ------------------------------------------------
 dfStratify <- obj_
 
 feature1 <- feature1[['var']][-di_which(feature1[['var']],
-                                        c('孩子的性别是', '孩子的出生方式', 'age', '鱼类或爬行类.', '其他植物或动物.'))]
+                                        c('Gender', 'ModeOfBirth', 'age', 'Fish or reptiles', 'Other plants or pets'))]
 get_compositionDrop(imp_togDf[, c('event', feature1)])
 
 
@@ -254,12 +253,12 @@ featureIn1 <- names(table(Features[["return"]][["orig"]][["Boruta_confi"]])[  # 
 
 featureIn2 <- names(table(Features[["return"]][["orig"]][["Boruta_togth"]])[  # Feature extraction not 'rejected'
   table(Features[["return"]][["orig"]][["Boruta_togth"]])>5])
-featureIn2 <- featureIn2[-which(featureIn2 %in% c('如果孩子不满1岁接受过抗生素治疗.那么有几次', '是否为独生子女'))]  #  repeat --240410
+featureIn2 <- featureIn2[-which(featureIn2 %in% c('Times of antibiotics using when cfy', 'onlyChild'))]  #  repeat --240410
 
 
 # Data segmentation----------------(around 12 hours)-------------------------------------
 str(dfModelOK)
-dfModelOK2 <- dfModelOK %>% dplyr::select(-c("孩子的性别是", "孩子的出生方式", "age"))  # Exclusion of stratification variables
+dfModelOK2 <- dfModelOK %>% dplyr::select(-c("Gender", "ModeOfBirth", "age"))  # Exclusion of stratification variables
 for (col in colnames(dfModelOK2)){
   dfModelOK2[, col] <- as.factor(dfModelOK2[, col])
 }
@@ -291,13 +290,13 @@ data.mergeADA2 <- get_mlDataDivide(ml_df_ = dfModelOK2,
                                    doResample = T, 
                                    SMOTE_ = list(do = F, size = 13),
                                    ADASYN_ = list(do = T, beta_ = 0.7, dist = "Overlap"), 
-                                   threhold_ = 0.995)  # 名存实亡
+                                   threhold_ = 0.995)  
 #  save(data.mergeADA2, file = 'data.mergeADA2.RData')   ----240412
 load('.//data.mergeADA2.RData')    # ---------------------------------------------------------------Intermediate data loading
 
 
-featureIn3 <- c('孩子母亲是否患有.过敏性.鼻炎', '孩子父亲是否患有.过敏性.鼻炎', 'haveOlderSblings',
-                '孩子是否有因食物引起的湿疹.荨麻疹.腹泄等', 'dadEducation')
+featureIn3 <- c('Mom with AR', 'Dad with AR', 'haveOlderSblings',
+                'Child with food allergy', 'dadEducation')
       # Select the 5 best performing features in the ‘coreFeature’.：---------lessFeature
 data.mergeADA3 <- get_mlDataDivide(ml_df_ = dfModelOK2,
                                    feature_in_ = featureIn3, seed_ = 1,
@@ -393,7 +392,7 @@ Logreg_ret2 <-  get_AggregateModel(data_iter_ = data.mergeADA2[[1]], stratify_df
                                    time_sleep_ = 0)
 
 Logreg_ret3 <-  get_AggregateModel(data_iter_ = data.mergeADA3[[1]], stratify_df_ = dfStratify[2], targ_var_ = 'event',
-                                   cut_ = round(seq(.01, .99, length.out = 49), digits = 2),  #精度2%
+                                   cut_ = round(seq(.01, .99, length.out = 49), digits = 2),  #precision 2%
                                    fitFuncs = getLR_model, predFuncs = getLR_Pred,
                                    time_sleep_ = 0)
 
@@ -556,7 +555,7 @@ getRF_optParam <- function(Tune.dat_, formula_, fitFuncs, predFuncs){
       samp_i2 <- c(1:nrow(X_))[-samp_i]
       
       fit2_ <- fitFuncs(model_dat_ = data.frame(event = Y_[samp_i], X_[samp_i, ]),
-                        formula_ = formula_, optParam = optParam) #-------------------模型2
+                        formula_ = formula_, optParam = optParam) #-------------------model 2
       pred2_.test <- predFuncs(model_ = fit2_, pred_X = X_[samp_i2, ])
       auroc.test2_ <- pROC::roc(ifelse(Y_[samp_i2] == '1', 1, 0),
                                 as.numeric(pred2_.test),
@@ -824,7 +823,7 @@ count_n <- c()
 for (featu_ in names(Final_Ret)){
   for (model_p in names(Final_Ret[[featu_]])[2:5]){
     for (samp_p in names(Final_Ret[[featu_]][[model_p]])){
-      for (stra_p in names(Final_Ret[[featu_]][[model_p]][[samp_p]])){  #分层变量
+      for (stra_p in names(Final_Ret[[featu_]][[model_p]][[samp_p]])){  # stratificated variables
         if (stra_p != 'all'){
           for (elem_p in names(Final_Ret[[featu_]][[model_p]][[samp_p]][[stra_p]])){
             for (imp_p in names(Final_Ret[[featu_]][[model_p]][[samp_p]][[stra_p]][[elem_p]])){
@@ -959,7 +958,7 @@ for (i in names(model_patam)){
 }
 
 
-#分层-------------------------------------------------------------
+#Stratification-------------------------------------------------------------
 
 dat_featu <- df_ro_prc_cutOff[df_ro_prc_cutOff[['featu']] == 'coreFeatures', ]
 dat_set <- dat_featu %>% dplyr::filter(sets == 'test') %>% 
@@ -1091,7 +1090,7 @@ for (task_p in c('auroc_adjust', 'optPoint', 'cutOff_validation', 'cutOff_test')
 
 
 
-# RF 和 XGBoost 与 LR的AUROC t检验-------------------------------------------
+# RF & XGBoost or LR AUROC t test-------------------------------------------
 
 
 df_compara <- dat_set[dat_set[['sets']] == 'test' & dat_set[['model']] != 'SVM',
@@ -1149,13 +1148,13 @@ for (type_p in c('train', 'test')){
   
   df_95CI2[df_95CI2[['stra']] == 'age', 'elem'] <- ifelse(df_95CI2[df_95CI2[['stra']] == 'age', 'elem'] == '0', '2-4', 
                                                           ifelse(df_95CI2[df_95CI2[['stra']] == 'age', 'elem'] == '1',
-                                                                 '5', '6-8'))  # "0 = 2-4岁；1 = 5岁；2 = 6-8岁"
+                                                                 '5', '6-8'))  # "0 = 2-4-year-old；1 = 5-year-old；2 = 6-8-year-old"
   
   df_95CI2[df_95CI2[['stra']] == 'birthWay', 'elem'] <- ifelse(df_95CI2[df_95CI2[['stra']] == 'birthWay', 'elem'] == '1',
-                                                               'eutocia', 'cesarean')  # "1=顺产；2=剖宫产"
+                                                               'eutocia', 'cesarean')  # "1=eutocia；2=cesarean"
   
   df_95CI2[df_95CI2[['stra']] == 'sex', 'elem'] <- ifelse(df_95CI2[df_95CI2[['stra']] == 'sex', 'elem'] == '1',
-                                                          'boy', 'girl')  # "1=男；2=女"
+                                                          'boy', 'girl')  # "1=male；2=female"
   
   
   df_95CI2 <- df_95CI2 %>% dplyr::mutate(
@@ -1195,7 +1194,7 @@ for (type_p in c('train', 'test')){
               size = 0.45, color = '#e03131', alpha = 1) +
     geom_abline(intercept = 0, slope = 1, linetype = 'dashed', size = .5) +
     xlab('1 - Specificities') + 
-    scale_y_continuous(expand=c(0,0),  # 让柱子底部与X轴紧贴
+    scale_y_continuous(expand=c(0,0),
                        breaks = c(.25, .50, .75, 1)) +
     scale_x_continuous(expand=c(.002,0)) +
     ylab('Sensitivities') +
@@ -1234,12 +1233,12 @@ dat_all <- rbind(data.mergeADA1[["nominal_"]][["sample_3"]][["all"]][["imp_1"]][
                  data.mergeADA1[["nominal_"]][["sample_3"]][["all"]][["imp_1"]][['validation']])
 
 var_standart <- data.frame(list(
-  var = c("dadEducation", "haveOlderSblings", "孩子0_1岁曾接受过抗生素治疗",
-          "孩子0_1岁有过至少连续6个月反复发作的瘙痒疹子", "孩子0到1岁期间.是否有人抽烟.父亲",
-          "孩子0到1岁时.是否在孩子住所杨宠物或植物", "孩子父亲是否患有.过敏性.鼻炎",
-          "孩子母亲是否患有.过敏性.鼻炎", "孩子母亲是否患有湿疹.或过敏性皮炎.",
-          "孩子是否有因食物引起的湿疹.荨麻疹.腹泄等", "孩子兄妹.若有.是否患有.过敏性.鼻炎", "开花植物.", 
-          "母亲怀孕期间期间.是否有人抽烟.父亲", "爷爷.."),
+  var = c("dadEducation", "haveOlderSblings", "ChildWithAntibiotics_0_1",
+          "RashSixM_0_1", "Father smoking during cfy",
+          "Feeding pats or growing plants during cfy", "Dad with AR",
+          "Mom with AR", "Mom with eczema",
+          "Child with food allergy", "Siblings with AR", "Flowering plants", 
+          "Paternal grandfather smoking during mp"),
   eng = c("Father’s education", 'Have older sblings', 'Antibiotic therapy during cfy',
           'Successive bouts of rash more \nthan 6 months during cfy', 'Father smoking during cfy', 
           'Feeding pats or growing \nplants during cfy', 'Father with AR', 'Mother with AR', 
@@ -1546,7 +1545,7 @@ a0_outp <- as.data.frame(matrix(c('0', as.vector(c(a0[["overall"]][1:2], a0[["by
 
 a1_0 <- rbind(a1_outp, a0_outp)
 
-write.xlsx(a1_0, 'confusionMatrix_positive订正.xlsx')
+write.xlsx(a1_0, 'confusionMatrix_positiveRevise.xlsx')
 
 
 
